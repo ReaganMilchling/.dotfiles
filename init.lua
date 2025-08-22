@@ -19,7 +19,6 @@ vim.opt.rtp:prepend(lazypath)
 
 -- [[ Configure plugins ]]
 require('lazy').setup({
-
   'tpope/vim-sleuth',
   'nvim-lua/plenary.nvim',
 
@@ -82,21 +81,6 @@ require('lazy').setup({
   },
 
   {
-    'windwp/nvim-autopairs',
-    dependencies = { 'hrsh7th/nvim-cmp' },
-    config = function()
-      require("nvim-autopairs").setup {}
-      -- If you want to automatically add `(` after selecting a function or method
-      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-      local cmp = require('cmp')
-      cmp.event:on(
-        'confirm_done',
-        cmp_autopairs.on_confirm_done()
-      )
-    end,
-  },
-
-  {
     'ThePrimeagen/harpoon',
     name = 'harpoon',
     branch = "harpoon2",
@@ -105,7 +89,7 @@ require('lazy').setup({
       local harpoon = require("harpoon")
       harpoon:setup()
 
-      vim.keymap.set("n", "<C-a>", function() harpoon:list():append() end)
+      vim.keymap.set("n", "<C-a>", function() harpoon:list():add() end)
       vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
       vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
@@ -113,8 +97,8 @@ require('lazy').setup({
       vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
       vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
 
-      vim.keymap.set("n", "<C-w>", function() harpoon:list():nav_next() end)
-      vim.keymap.set("n", "<C-q>", function() harpoon:list():nav_prev() end)
+      vim.keymap.set("n", "<C-w>", function() harpoon:list():next() end)
+      vim.keymap.set("n", "<C-q>", function() harpoon:list():prev() end)
     end,
   },
 
@@ -184,6 +168,13 @@ vim.keymap.set("n", "<leader>ll", vim.cmd.Ex)
 vim.keymap.set("n", "<leader>rr", vim.cmd.Rex)
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
+
+-- prime remaps
+vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
+-- vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+-- vim.keymap.set("n", "<leader>Y", ":w !wl-copy<CR><CR>")
+-- vim.keymap.set("n", "<leader>V", [["+p]])
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -265,13 +256,13 @@ vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
-vim.keymap.set('n', '<leader>/', function()
+vim.keymap.set('n', '<leader>fc', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     winblend = 10,
     previewer = false,
   })
-end, { desc = '[/] Fuzzily search in current buffer' })
+end, { desc = '[F]uzzily search in [c]urrent buffer' })
 
 local function telescope_live_grep_open_files()
   require('telescope.builtin').live_grep {
@@ -365,10 +356,6 @@ end, 0)
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
   local nmap = function(keys, func, desc)
@@ -421,22 +408,12 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  lua_ls = {},
   clangd = {},
-  -- gopls = {},
-  pyright = {},
-  -- rust_analyzer = {},
-  tsserver = {},
-  html = { filetypes = { 'html', 'twig', 'hbs'} },
-
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-      -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      -- diagnostics = { disable = { 'missing-fields' } },
-    },
-  },
+  gopls = {},
+  rust_analyzer = {},
+  ts_ls = {},
+  java_language_server = {},
+  html = {},
 }
 
 -- Setup neovim lua configuration
@@ -463,6 +440,24 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+
+-- setup html
+-- opts = {
+--   settings = {
+--     html = {
+--       format = {
+--         templating = true,
+--         wrapLineLength = 120,
+--         wrapAttributes = 'auto',
+--       },
+--       hover = {
+--         documentation = true,
+--         references = true,
+--       },
+--     },
+--   },
+-- }
+--require('html').setup()
 
 
 -- [[ Configure nvim-cmp ]]
